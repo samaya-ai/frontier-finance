@@ -71,7 +71,7 @@ class EvalRunner:
             os.path.join(cfg.output_dir, "per_item.json"), self._per_item(results)
         )
 
-        logger.info("evaluation metrics:\n%s", MetricsReport.to_markdown_table(metrics))
+        logger.info("Evaluation Metrics:\n%s", MetricsReport.to_markdown_table(metrics))
         return metrics
 
     @staticmethod

@@ -11,7 +11,9 @@ Terminology (matches the source criteria-eval task):
   harness-side failure, not the system's, so it is *excluded* from every scored
   metric (num_records and all denominators) — equivalent to skipping it — and
   only surfaced as a count and in the per-judge failed-check stats.
-- *must_have*: the essential subset of rubrics.
+- *must_have*: the essential subset of rubrics. must_have averages are taken
+  only over queries that have at least one must_have rubric — a query with none
+  neither qualifies nor fails a must_have and is left out of the denominator.
 """
 
 from __future__ import annotations
@@ -68,6 +70,7 @@ class MetricsReport:
         ]
 
         n_records = len(results)
+        mh_n_records = sum(1 for r in results if any(rb.must_have for rb in r.rubrics))
 
         # Per-judge count of rubric checks the judge failed to produce, summed
         # across ALL queries (including excluded judge errors and partial
@@ -110,7 +113,7 @@ class MetricsReport:
             ),
             # must_have rubrics, all queries.
             "macro_avg_qualification_rate_must_have_on_all_queries": self._safe_div(
-                sum(mh_rates), n_records
+                sum(mh_rates), mh_n_records
             ),
             "micro_avg_qualification_rate_must_have_on_all_queries": self._safe_div(
                 mh_qualified_success, mh_total_all

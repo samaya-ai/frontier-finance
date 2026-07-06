@@ -145,6 +145,11 @@ class OpenAIJudge(Judge):
         self._client = openai.OpenAI(timeout=timeout, max_retries=max_retries)
 
     def complete(self, system: str, user: str) -> str:
+        kwargs: dict = {}
+        # Pin temperature=0 for deterministic judging on gpt-* chat models. The
+        # o* reasoning models 400 on any temperature != 1, so it's omitted there.
+        if self.model.startswith("gpt-"):
+            kwargs["temperature"] = 0
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[
@@ -152,6 +157,7 @@ class OpenAIJudge(Judge):
                 {"role": "user", "content": user},
             ],
             max_completion_tokens=self._max_tokens,
+            **kwargs,
         )
         return response.choices[0].message.content or ""
 

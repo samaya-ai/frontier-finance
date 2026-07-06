@@ -49,6 +49,11 @@ class DataLoader:
         """Load the rubrics file into ``{query_id: EvalItem}`` (response unset)."""
         items: dict[str, EvalItem] = {}
         for obj in self._iter_jsonl(self._rubrics_path):
+            for key in ("query_id", "query", "query_date"):
+                if key not in obj:
+                    raise ValueError(
+                        f"rubrics entry missing required key {key!r}: {obj}"
+                    )
             query_id = str(obj["query_id"])
             rubrics = [Rubric.from_dict(r) for r in obj.get("rubrics", [])]
             if not rubrics:
@@ -78,6 +83,11 @@ class DataLoader:
         """Load the ``system_summaries.json`` array into ``{query_id: summary}``."""
         with open(self._responses_path) as f:
             data = json.load(f)
+        if not isinstance(data, list):
+            raise ValueError(
+                f"{self._responses_path}: expected a JSON array of responses, "
+                f"got {type(data).__name__}."
+            )
         responses: dict[str, str] = {}
         for obj in data:
             query_id = str(obj["query_id"])

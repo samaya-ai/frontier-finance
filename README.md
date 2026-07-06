@@ -30,7 +30,11 @@ For local development on this package:
 uv sync --extra dev   # installs all backends + pytest
 ```
 
-Set the API key for whichever judge models you use:
+## Run
+
+### Step 1 — Export the API key(s) for your judge models
+
+Set the key for whichever judge models your config uses:
 
 ```bash
 export ANTHROPIC_API_KEY=...   # claude-* judges (default)
@@ -38,7 +42,28 @@ export OPENAI_API_KEY=...      # gpt-* / o* judges
 export GEMINI_API_KEY=...      # gemini-* judges
 ```
 
-## Run
+### Step 2 — Write your run config
+
+Create a YAML config pointing at your rubrics and responses. See
+[`eval.example.yaml`](eval.example.yaml) — the exact config we used to produce
+our reported numbers — and adjust the paths, `judge_models`, and knobs as needed:
+
+```yaml
+rubrics_path: data/rubrics.jsonl
+responses_path: data/system_summaries.json
+output_dir: grader_results/
+
+judge_models:
+  - claude-sonnet-4-6
+  - gemini-3.1-pro-preview
+  - gpt-5.4
+
+max_rubrics_per_call: 30   # rubrics per LLM call
+concurrency: 8             # queries graded in parallel
+max_tokens: 64000          # max output tokens per judge call
+```
+
+### Step 3 — Run the grader
 
 ```bash
 uv run frontier-finance-grader --config eval.example.yaml
@@ -68,8 +93,7 @@ a metrics table.
 }
 ```
 
-Other fields (`use_cases`, `capabilities`, `rubric_subtype`, `data_source_detailed`)
-are accepted and ignored.
+Other fields are accepted but ignored.
 
 **Responses JSON** — a JSON array (the criteria_eval `system_summaries.json`);
 each `query_id` must match a rubrics line:

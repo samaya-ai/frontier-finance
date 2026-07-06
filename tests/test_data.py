@@ -48,8 +48,50 @@ def test_invalid_json_line_raises(tmp_path):
     import pytest
 
     rubrics_path = tmp_path / "rubrics.jsonl"
-    responses_path = tmp_path / "responses.jsonl"
+    responses_path = tmp_path / "responses.json"
     rubrics_path.write_text("{not valid json}\n")
-    responses_path.write_text("")
-    with pytest.raises(ValueError):
+    responses_path.write_text("[]")
+    with pytest.raises(ValueError, match="invalid JSON"):
+        DataLoader(str(rubrics_path), str(responses_path)).load()
+
+
+def test_missing_required_rubric_key_raises(tmp_path):
+    import pytest
+
+    rubrics_path = tmp_path / "rubrics.jsonl"
+    responses_path = tmp_path / "responses.json"
+    # No query_date on the rubrics entry.
+    _write_jsonl(
+        rubrics_path,
+        [
+            {
+                "query_id": "q1",
+                "query": "Q",
+                "rubrics": [{"rubric_id": 1, "rubric_text": "r", "must_have": True}],
+            }
+        ],
+    )
+    responses_path.write_text("[]")
+    with pytest.raises(ValueError, match="query_date"):
+        DataLoader(str(rubrics_path), str(responses_path)).load()
+
+
+def test_responses_not_a_list_raises(tmp_path):
+    import pytest
+
+    rubrics_path = tmp_path / "rubrics.jsonl"
+    responses_path = tmp_path / "responses.json"
+    _write_jsonl(
+        rubrics_path,
+        [
+            {
+                "query_id": "q1",
+                "query": "Q",
+                "query_date": "2024-01-01",
+                "rubrics": [{"rubric_id": 1, "rubric_text": "r", "must_have": True}],
+            }
+        ],
+    )
+    responses_path.write_text('{"query_id": "q1", "system_summary": "x"}')
+    with pytest.raises(ValueError, match="JSON array"):
         DataLoader(str(rubrics_path), str(responses_path)).load()

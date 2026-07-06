@@ -40,6 +40,35 @@ def test_aggregate_basic_rates():
     assert m["macro_avg_qualification_rate_must_have_on_success_queries"] == 1.0
 
 
+def test_must_have_all_queries_ignores_queries_without_must_have():
+    # A: one must_have rubric, qualified. B: no must_have rubrics at all.
+    # B must not dilute the must_have averages; with no failures, the must_have
+    # all-queries and success-queries macros must agree.
+    a = ItemResult(query_id="A", rubrics=[_rubric(1, True)], labels=[True])
+    b = ItemResult(query_id="B", rubrics=[_rubric(2, False)], labels=[False])
+    m = MetricsReport([a, b]).compute()
+
+    assert m["macro_avg_qualification_rate_must_have_on_success_queries"] == 1.0
+    assert m["macro_avg_qualification_rate_must_have_on_all_queries"] == 1.0
+    assert m["micro_avg_qualification_rate_must_have_on_all_queries"] == 1.0
+
+
+def test_must_have_all_queries_penalizes_failed_query():
+    # A: must_have qualified (rate 1.0). B: failed, has a must_have rubric -> 0.
+    # macro-all = mean(1.0, 0.0) over the two must_have-bearing queries = 0.5.
+    a = ItemResult(query_id="A", rubrics=[_rubric(1, True)], labels=[True])
+    b = ItemResult(
+        query_id="B",
+        rubrics=[_rubric(1, True)],
+        failed=True,
+        failure_reason="no_response",
+    )
+    m = MetricsReport([a, b]).compute()
+
+    assert m["macro_avg_qualification_rate_must_have_on_success_queries"] == 1.0
+    assert m["macro_avg_qualification_rate_must_have_on_all_queries"] == 0.5
+
+
 def test_failed_query_affects_all_but_not_success():
     ok = ItemResult(query_id="A", rubrics=[_rubric(1, True)], labels=[True])
     bad = ItemResult(

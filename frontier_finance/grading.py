@@ -114,9 +114,7 @@ class Grader:
         for attempt in range(self._max_json_parse_retries + 1):
             # Nudge the format on retries; the call is otherwise identical.
             user_prompt = (
-                user
-                if attempt == 0
-                else user + RubricPrompt.JSON_FORMAT_RETRY_SUFFIX
+                user if attempt == 0 else user + RubricPrompt.JSON_FORMAT_RETRY_SUFFIX
             )
             try:
                 text = judge.complete(RubricPrompt.SYSTEM, user_prompt)
@@ -158,7 +156,7 @@ class Grader:
         result: list[bool] = []
         for i in range(width):
             votes = sum(labels[i] for labels in per_model_labels)
-            if votes * 2 == n:  # tie -> first model decides
+            if votes * 2 == n:
                 result.append(per_model_labels[0][i])
             else:
                 result.append(votes * 2 > n)

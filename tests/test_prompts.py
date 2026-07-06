@@ -1,21 +1,16 @@
 from frontier_finance.prompts import RubricPrompt
 
 
-def test_parse_fenced_json():
+def test_try_parse_fenced_json():
     text = 'here you go:\n```json\n{"0": {"reason": "yes", "label": true}}\n```'
-    assert RubricPrompt.parse(text) == {"0": {"reason": "yes", "label": True}}
+    assert RubricPrompt.try_parse(text) == {"0": {"reason": "yes", "label": True}}
 
 
-def test_parse_raw_json_with_prose():
+def test_try_parse_raw_json_with_prose():
     text = 'Sure. {"0": {"label": true}, "1": {"label": false}} done.'
-    parsed = RubricPrompt.parse(text)
+    parsed = RubricPrompt.try_parse(text)
     assert parsed["0"]["label"] is True
     assert parsed["1"]["label"] is False
-
-
-def test_parse_garbage_returns_empty():
-    assert RubricPrompt.parse("no json at all") == {}
-    assert RubricPrompt.parse("") == {}
 
 
 def test_try_parse_returns_none_on_failure():
@@ -49,4 +44,3 @@ def test_build_user_embeds_report_exactly_once():
     rubrics = [Rubric(rubric_id=1, rubric_text="alpha", must_have=True)]
     full = RubricPrompt.build_user("Q", "2024-01-01", "the-report", rubrics)
     assert full.count("<report>\nthe-report\n</report>") == 1
-    assert "0. alpha" in full

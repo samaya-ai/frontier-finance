@@ -45,7 +45,7 @@ Pay special attention to the following aspects when making your judgement:
 3. **Accept reasonable numerical approximation**. A figure in the report is acceptable if it equals the rubric's figure after rounding the rubric's figure to the (coarser) precision the report uses. A figure stated at the same or finer precision than the rubric's, but with a different value, is NOT acceptable — even if numerically close. For example, against a rubric value of "3,098 million": "3.1 billion" is acceptable (a correct rounding to two significant figures), but "3,105 million" is not (it asserts a precise, different value). Likewise against "7.14%": "7.1%" is acceptable, but "7.25%" is not.\
 """
 
-    _TEMPLATE_PREFIX: ClassVar[str] = """\
+    _TEMPLATE: ClassVar[str] = """\
 You will evaluate the report below against the given set of rubrics. The report has been written to answer a specific query.
 
 The query is provided below within the <query> tags.
@@ -62,9 +62,7 @@ The financial report is provided below within the <report> tags.
 <report>
 {generated_summary}
 </report>
-"""
 
-    _TEMPLATE_SUFFIX: ClassVar[str] = """
 Now that you have read the query and the report, please evaluate whether the report satisfies each of the following rubrics. The list of rubrics is provided below within the <rubrics> tags. Each rubric is annotated with a unique ID, which you should use in your output to refer to that rubric.
 <rubrics>
 {criteria}
@@ -115,17 +113,12 @@ Output your evaluation as the JSON object specified above and nothing else.\
         criteria = "\n\n".join(
             f"{i}. {r.rubric_text}".strip() for i, r in enumerate(batch_rubrics)
         )
-        prefix = cls._TEMPLATE_PREFIX.format(
+        return cls._TEMPLATE.format(
             query=query,
             query_date=query_date,
             generated_summary=system_response,
-        )
-        suffix = cls._TEMPLATE_SUFFIX.format(
-            query=query,
-            query_date=query_date,
             criteria=criteria,
         )
-        return prefix + suffix
 
     @classmethod
     def try_parse(cls, response_str: str) -> dict[str, dict[str, Any]] | None:
@@ -159,12 +152,3 @@ Output your evaluation as the JSON object specified above and nothing else.\
 
         logger.error("could not extract JSON from judge response: %.200s", response_str)
         return None
-
-    @classmethod
-    def parse(cls, response_str: str) -> dict[str, dict[str, Any]]:
-        """Like :meth:`try_parse` but maps a parse failure to an empty ``{}``.
-
-        Kept for callers that don't need to distinguish failure from an empty
-        result; prefer :meth:`try_parse` when a parse failure should be retried.
-        """
-        return cls.try_parse(response_str) or {}
