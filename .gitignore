@@ -1,0 +1,6 @@
+.idea/
+.venv/
+__pycache__/
+.env
+data/
+grader_results/

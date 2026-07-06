@@ -1,0 +1,33 @@
+[project]
+name = "frontier-finance"
+version = "0.1.0"
+description = "Rubrics-based LLM evaluation: grade system responses against per-query rubrics with an LLM judge panel."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pyyaml>=6",
+    "tqdm>=4.66",
+]
+
+[project.scripts]
+frontier-finance-grader = "frontier_finance.cli:CLI.main"
+
+[project.optional-dependencies]
+# Judge backends — install only the flavors you use, e.g.
+#   uv pip install 'frontier-finance[anthropic]'
+#   uv pip install 'frontier-finance[anthropic,gemini]'
+anthropic = ["anthropic>=0.49"]
+openai = ["openai>=1.0"]
+gemini = ["google-genai>=0.3"]
+all = ["frontier-finance[anthropic,openai,gemini]"]
+dev = ["frontier-finance[all]", "pytest>=8", "ruff>=0.15.20"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["frontier_finance"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

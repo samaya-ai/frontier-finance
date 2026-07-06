@@ -1,0 +1,28 @@
+# Example run config for `frontier-finance-grader --config eval.example.yaml`.
+
+rubrics_path: rubrics.jsonl
+responses_path: system_summaries.json
+output_dir: grader_results
+
+judge_models:
+  - claude-opus-4-8
+  # - claude-sonnet-4-6
+  # - gpt-5.4
+  # - gemini-3.1-pro-preview
+
+# Rubrics per LLM call.
+max_rubrics_per_call: 30
+
+# Queries graded in parallel.
+concurrency: 8
+
+# Max output tokens per judge call.
+max_tokens: 64000
+
+# Per-request timeout (seconds) and SDK retry count (transport/API failures).
+request_timeout: 60.0
+max_retries: 2
+
+# Retries when a judge call succeeds but its body can't be parsed as JSON.
+# The judge is re-prompted with a format reminder; 0 disables parse retries.
+max_json_parse_retries: 1
