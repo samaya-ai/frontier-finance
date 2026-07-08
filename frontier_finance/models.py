@@ -48,7 +48,7 @@ class ItemResult:
 
     - ``"no_response"`` — no ``system_response`` was supplied (a system failure).
     - ``"judge_error"`` — a response existed but *every* judge model errored (a
-      harness-side failure, not the system's).
+      grader-side failure, not the system's).
 
     A partial judge failure (some judges error, at least one succeeds) is NOT a
     failure — the query is graded on the surviving votes. ``failed_checks_by_judge``

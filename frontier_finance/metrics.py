@@ -8,7 +8,7 @@ Terminology (matches the source criteria-eval task):
   model succeeded). *failed* queries (no response) contribute 0 qualified and
   their full rubric count toward the "all queries" denominators.
 - *judge error*: every judge model failed on a present response. This is a
-  harness-side failure, not the system's, so it is *excluded* from every scored
+  grader-side failure, not the system's, so it is *excluded* from every scored
   metric (num_records and all denominators) — equivalent to skipping it — and
   only surfaced as a count and in the per-judge failed-check stats.
 - *must_have*: the essential subset of rubrics. must_have averages are taken
@@ -33,7 +33,7 @@ class MetricsReport:
     def compute(self) -> dict[str, Any]:
         """Compute the full metrics dict from the graded results."""
         # Judge errors are excluded from every scored metric (they're the
-        # harness's fault, not the system's); `results` is the scored set.
+        # grader's fault, not the system's); `results` is the scored set.
         judge_errors = [r for r in self._results if r.failure_reason == "judge_error"]
         results = [r for r in self._results if r.failure_reason != "judge_error"]
         success = [r for r in results if not r.failed]

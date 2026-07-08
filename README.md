@@ -4,12 +4,14 @@
   </a>
 </p>
 
-# Samaya AI's FrontierFinance Benchmark Grading Harness
+# Samaya AI's FrontierFinance Benchmark Grader
 
-[![Benchmark](https://img.shields.io/badge/Benchmark-research.samaya.ai-4c6ef5?logo=readthedocs&logoColor=white)](https://research.samaya.ai/benchmarks/frontier-finance)
-[![Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-samaya--ai%2FFrontierFinance-ffce3a)](https://huggingface.co/datasets/samaya-ai/FrontierFinance)
+<p align="center">
+  <a href="https://research.samaya.ai/benchmarks/frontier-finance"><img src="https://img.shields.io/badge/Benchmark-research.samaya.ai-4c6ef5?logo=readthedocs&logoColor=white" alt="Benchmark"></a>
+  <a href="https://huggingface.co/datasets/samaya-ai/FrontierFinance"><img src="https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-samaya--ai%2FFrontierFinance-ffce3a" alt="Dataset"></a>
+</p>
 
-Rubrics-based LLM evaluation harness for Samaya AI's FrontierFinance benchmark.
+Rubrics-based LLM grader for Samaya AI's FrontierFinance benchmark.
 Given a set of **rubrics** per query and the **system responses** you want to grade, 
 an LLM judge panel decides whether each rubric is satisfied, and the tool reports 
 qualification-rate metrics.
@@ -140,7 +142,7 @@ retries) is dropped from the vote, and the rubric checks it skipped are counted
 against it in `failed_criteria_checks_by_judge`. As long as at least one judge
 survives, the query is still graded on the surviving votes — a partial judge
 failure is *not* a failed query. When **every** judge fails on a present response
-(`failure_reason: "judge_error"`), that's a harness-side failure, not the
+(`failure_reason: "judge_error"`), that's a grader-side failure, not the
 system's, so the query is **excluded from every scored metric** (`num_records`
 and all denominators) — equivalent to skipping it — and only reported via
 `num_judge_errors` and the per-judge stats. A query with no response
