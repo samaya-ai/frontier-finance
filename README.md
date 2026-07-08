@@ -1,4 +1,13 @@
+<p align="center">
+  <a href="https://research.samaya.ai/benchmarks/frontier-finance">
+    <img src="assets/samaya_logo.png" alt="Samaya AI" width="220">
+  </a>
+</p>
+
 # Samaya AI's FrontierFinance Benchmark Grading Harness
+
+[![Benchmark](https://img.shields.io/badge/Benchmark-research.samaya.ai-4c6ef5?logo=readthedocs&logoColor=white)](https://research.samaya.ai/benchmarks/frontier-finance)
+[![Dataset](https://img.shields.io/badge/%F0%9F%A4%97%20Dataset-samaya--ai%2FFrontierFinance-ffce3a)](https://huggingface.co/datasets/samaya-ai/FrontierFinance)
 
 Rubrics-based LLM evaluation harness for Samaya AI's FrontierFinance benchmark.
 Given a set of **rubrics** per query and the **system responses** you want to grade, 
@@ -7,6 +16,8 @@ qualification-rate metrics.
 
 It is self-contained: it talks to provider APIs through their official SDKs and
 has no dependency on any internal evaluation framework.
+
+![Rubrics qualification rate vs. cost per query across systems, with the Samaya System leading the desirable high-quality/low-cost region.](assets/pareto_graph.png)
 
 ## Install
 
@@ -30,6 +41,20 @@ For local development on this package:
 uv sync --extra dev   # installs all backends + pytest
 ```
 
+## Get the data
+
+The Hugging Face dataset ships the **rubrics** (`frontier_finance_public.jsonl`);
+you bring your own system responses to grade against them. Download the rubrics
+into the current directory with:
+
+```bash
+./scripts/download_data.sh          # -> ./frontier_finance_public.jsonl
+./scripts/download_data.sh some/dir # or into a directory of your choice
+```
+
+The dataset is public — no login or token needed. The script uses the `hf` CLI
+when available and otherwise falls back to `curl`.
+
 ## Run
 
 ### Step 1 — Export the API key(s) for your judge models
@@ -49,8 +74,8 @@ Create a YAML config pointing at your rubrics and responses. See
 our reported numbers — and adjust the paths, `judge_models`, and knobs as needed:
 
 ```yaml
-rubrics_path: data/rubrics.jsonl
-responses_path: data/system_summaries.json
+rubrics_path: frontier_finance_public.jsonl   # from ./scripts/download_data.sh
+responses_path: system_summaries.json         # your own system responses
 output_dir: grader_results/
 
 judge_models:
@@ -74,7 +99,8 @@ a metrics table.
 
 ## Input formats
 
-**Rubrics JSONL** — one query per line:
+**Rubrics JSONL** — what you get from `download_data.sh`, for reference; one query
+per line:
 
 ```json
 {
@@ -93,10 +119,8 @@ a metrics table.
 }
 ```
 
-Other fields are accepted but ignored.
-
-**Responses JSON** — a JSON array (the criteria_eval `system_summaries.json`);
-each `query_id` must match a rubrics line:
+**Responses JSON** — the responses from your own system, as a JSON array; each
+`query_id` must match a rubrics line:
 
 ```json
 [{"query_id": "85bc71fb95e1a5c4", "system_summary": "Databricks competes with..."}]

@@ -1,7 +1,7 @@
 # Example run config for `frontier-finance-grader --config eval.example.yaml`.
 
-rubrics_path: data/rubrics.jsonl
-responses_path: data/system_summaries.json
+rubrics_path: frontier_finance_public.jsonl   # from ./scripts/download_data.sh
+responses_path: system_summaries.json         # your own system responses
 output_dir: grader_results/
 
 judge_models:
