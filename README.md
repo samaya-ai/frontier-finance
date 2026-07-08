@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# Samaya AI's FrontierFinance Benchmark Grader
+<h1 align="center">Samaya AI's FrontierFinance Benchmark Grader</h1>
 
 <p align="center">
   <a href="https://research.samaya.ai/benchmarks/frontier-finance"><img src="https://img.shields.io/badge/Benchmark-research.samaya.ai-4c6ef5?logo=readthedocs&logoColor=white" alt="Benchmark"></a>
