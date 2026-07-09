@@ -19,6 +19,8 @@ qualification-rate metrics.
 It is self-contained: it talks to provider APIs through their official SDKs and
 has no dependency on any internal evaluation framework.
 
+Read more about FrontierFinance and our system benchmarking results in [our blog post](https://samaya.ai/blog/frontier-finance).
+
 ![Rubrics qualification rate vs. cost per query across systems, with the Samaya System leading the desirable high-quality/low-cost region.](assets/pareto_graph.png)
 
 ## Install
