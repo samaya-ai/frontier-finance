@@ -92,6 +92,11 @@ concurrency: 8             # queries graded in parallel
 max_tokens: 64000          # max output tokens per judge call
 ```
 
+**Note on judge models**: The three default judge models achieve high agreement with a committee of 9 individual judge, which we use in across all our experiments.
+Using three judges from three different model providers also help alleviate bias caused by any single model family.
+**For standardized grading and fair comparison of results, we recommend that you use the same three judges (Sonnet 4.6, Gemini 3.1 Pro, GPT 5.4).**
+
+
 ### Step 3 — Run the grader
 
 ```bash
