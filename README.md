@@ -183,6 +183,7 @@ If you use FrontierFinance dataset or this grading code, please cite as the foll
 @article{zhang2026frontierfinance,
   title   = {FrontierFinance: A Benchmark for Measuring Frontier Intelligence of Finance Agents},
   author  = {Zhang, Yuhao and Koyluoglu, Ozan and Venkatesh, Thejas and Diehl Martinez, Richard and Bhatia, Vishank and Alidoust, Arash and Paranjape, Ashwin},
-  year    = {2026}
+  year    = {2026},
+  url     = {https://samaya.ai/blog/frontier-finance}
 }
 ```
