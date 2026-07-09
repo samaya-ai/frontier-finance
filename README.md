@@ -92,7 +92,7 @@ concurrency: 8             # queries graded in parallel
 max_tokens: 64000          # max output tokens per judge call
 ```
 
-**Note on judge models**: The three default judge models achieve high agreement with a committee of 9 individual judge, which we use in across all our experiments.
+**Note on judge models**: We select the three default judge models so that they achieve high agreement with a committee of 9 individual judges. Therfore we use these three judges across all our experiments.
 Using three judges from three different model providers also help alleviate bias caused by any single model family.
 **For standardized grading and fair comparison of results, we recommend that you use the same three judges (Sonnet 4.6, Gemini 3.1 Pro, GPT 5.4).**
 
@@ -186,7 +186,7 @@ uv run pytest
 If you use FrontierFinance dataset or this grading code, please cite as the following:
 ```
 @article{zhang2026frontierfinance,
-  title   = {FrontierFinance: A Benchmark for Measuring Frontier Intelligence of Finance Agents},
+  title   = {FrontierFinance: A Challenging Benchmark for Measuring Frontier Intelligence of Finance Agents},
   author  = {Zhang, Yuhao and Koyluoglu, Ozan and Venkatesh, Thejas and Diehl Martinez, Richard and Bhatia, Vishank and Alidoust, Arash and Paranjape, Ashwin},
   year    = {2026},
   url     = {https://samaya.ai/blog/frontier-finance}
