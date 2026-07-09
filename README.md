@@ -173,3 +173,14 @@ query's `failure_reason` and `failed_checks_by_judge`.
 ```bash
 uv run pytest
 ```
+
+## Citation
+
+If you use FrontierFinance dataset or this grading code, please cite as the following:
+```
+@article{zhang2026frontierfinance,
+  title   = {FrontierFinance: A Benchmark for Measuring Frontier Intelligence of Finance Agents},
+  author  = {Zhang, Yuhao and Koyluoglu, Ozan and Venkatesh, Thejas and Diehl Martinez, Richard and Bhatia, Vishank and Alidoust, Arash and Paranjape, Ashwin},
+  year    = {2026}
+}
+```
