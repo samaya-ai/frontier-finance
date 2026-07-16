@@ -59,6 +59,11 @@ into the current directory with:
 The dataset is public — no login or token needed. The script uses the `hf` CLI
 when available and otherwise falls back to `curl`.
 
+The FrontierFinance rubrics dataset is published separately under the
+[Creative Commons Attribution 4.0 International (CC-BY-4.0)](https://creativecommons.org/licenses/by/4.0/)
+license; see its [dataset card](https://huggingface.co/datasets/samaya-ai/FrontierFinance).
+Using it requires attribution per those terms.
+
 ## Run
 
 ### Step 1 — Export the API key(s) for your judge models
@@ -192,3 +197,11 @@ If you use FrontierFinance dataset or this grading code, please cite as the foll
   url     = {https://samaya.ai/blog/frontier-finance}
 }
 ```
+
+## License
+
+This grading code is licensed under the [Apache License 2.0](LICENSE).
+
+The FrontierFinance rubrics dataset it operates on is licensed separately under
+[CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) and is not covered by
+this repository's license. See [NOTICE](NOTICE) for details.

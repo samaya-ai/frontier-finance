@@ -1,0 +1,17 @@
+FrontierFinance Benchmark Grader
+Copyright 2026 Samaya AI, Inc.
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+------------------------------------------------------------------------------
+
+This tool grades system responses against the FrontierFinance rubrics dataset,
+which is distributed separately and is NOT covered by this repository's license.
+
+  FrontierFinance dataset
+  Copyright 2026 Samaya AI, Inc.
+  Licensed under Creative Commons Attribution 4.0 International (CC-BY-4.0):
+      https://creativecommons.org/licenses/by/4.0/
+  Source: https://huggingface.co/datasets/samaya-ai/FrontierFinance
+
+Use of the dataset is subject to its CC-BY-4.0 terms, including attribution.
