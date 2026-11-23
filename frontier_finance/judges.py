@@ -19,6 +19,10 @@ _CLAUDE_VERSIONED_RE = re.compile(r"claude-(opus|sonnet)-(\d+)(?:-(\d+))?")
 
 GEMINI_DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
+# Snapshot suffixes a provider may append to the requested model name in the
+# response: gpt-5.4-2026-03-05, gpt-4-0613, gemini-2.0-flash-001.
+_SNAPSHOT_SUFFIX = r"(?:-\d{4}-\d{2}-\d{2}|-\d{3,4})?"
+
 
 class Judge(ABC):
     """Base for a single-model judge client."""
@@ -168,7 +172,21 @@ class OpenAIJudge(Judge):
             max_completion_tokens=self._max_tokens,
             **self._request_kwargs(),
         )
+        self._check_served_model(response.model)
         return response.choices[0].message.content or ""
+
+    def _check_served_model(self, served: str | None) -> None:
+        """Fail if a different model answered (e.g. a gateway fallback).
+
+        Accepts the requested name, optionally with a ``models/`` or
+        ``<provider>/`` prefix and a dated/numbered snapshot suffix.
+        """
+        name = (served or "").rsplit("/", 1)[-1]
+        if not re.fullmatch(rf"{re.escape(self.model)}{_SNAPSHOT_SUFFIX}", name):
+            raise RuntimeError(
+                f"Judge {self.model!r} was answered by model {served!r}; "
+                "refusing a substitute model's verdict."
+            )
 
 
 class GeminiJudge(OpenAIJudge):

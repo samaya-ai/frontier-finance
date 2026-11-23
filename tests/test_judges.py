@@ -50,6 +50,8 @@ class _FakeOpenAI:
     """Stands in for openai.OpenAI; records constructor and create() kwargs."""
 
     instances: list["_FakeOpenAI"] = []
+    # Model name the fake server reports; None echoes the requested model.
+    served_model: str | None = None
 
     def __init__(self, **kwargs):
         self.init_kwargs = kwargs
@@ -62,7 +64,8 @@ class _FakeOpenAI:
         self.create_kwargs = kwargs
         message = type("Message", (), {"content": '{"0": {"label": true}}'})()
         choice = type("Choice", (), {"message": message})()
-        return type("Response", (), {"choices": [choice]})()
+        served = self.served_model or kwargs["model"]
+        return type("Response", (), {"choices": [choice], "model": served})()
 
 
 @pytest.fixture
@@ -70,6 +73,7 @@ def fake_openai(monkeypatch):
     import openai
 
     _FakeOpenAI.instances = []
+    _FakeOpenAI.served_model = None
     monkeypatch.setattr(openai, "OpenAI", _FakeOpenAI)
     for var in (
         "GEMINI_API_KEY",
@@ -203,3 +207,49 @@ def test_openai_judge_request(fake_openai, monkeypatch, model, extra):
 def test_openai_judge_requires_key(fake_openai):
     with pytest.raises(RuntimeError, match="OPENAI_API_KEY"):
         Judge.build("gpt-5.4", **_BUILD_KWARGS)
+
+
+@pytest.mark.parametrize(
+    "requested, served",
+    [
+        ("gemini-3.1-pro-preview", "gemini-3.1-pro-preview"),
+        ("gemini-3.1-pro-preview", "models/gemini-3.1-pro-preview"),
+        ("gemini-2.0-flash", "gemini-2.0-flash-001"),
+        ("gpt-5.4", "gpt-5.4-2026-03-05"),
+        ("gpt-4", "gpt-4-0613"),
+    ],
+)
+def test_served_model_accepts_same_model(fake_openai, monkeypatch, requested, served):
+    monkeypatch.setenv("GEMINI_API_KEY", "gem-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "openai-key")
+    fake_openai.served_model = served
+    _complete(Judge.build(requested, **_BUILD_KWARGS))
+
+
+@pytest.mark.parametrize(
+    "requested, served",
+    [
+        # Gateway fallbacks answering with a different model.
+        ("gemini-3.1-pro-preview", "gemini-2.5-pro"),
+        ("gemini-3.1-pro-preview", "gemini-3.8-flash"),
+        ("gemini-3-pro-preview", "gemini-3.1-pro-preview"),
+        ("gemini-3-flash-preview", "gemini-3-flash-preview-lite"),
+        ("gpt-5.4", "gpt-5.4-mini"),
+        ("gpt-5.4", "gpt-4o"),
+    ],
+)
+def test_served_model_rejects_substitute(fake_openai, monkeypatch, requested, served):
+    monkeypatch.setenv("GEMINI_API_KEY", "gem-key")
+    monkeypatch.setenv("OPENAI_API_KEY", "openai-key")
+    fake_openai.served_model = served
+    judge = Judge.build(requested, **_BUILD_KWARGS)
+    with pytest.raises(RuntimeError, match="answered by model"):
+        judge.complete("sys", "usr")
+
+
+@pytest.mark.parametrize("served", [None, ""])
+def test_served_model_rejects_missing(fake_openai, monkeypatch, served):
+    monkeypatch.setenv("GEMINI_API_KEY", "gem-key")
+    judge = Judge.build("gemini-3-flash-preview", **_BUILD_KWARGS)
+    with pytest.raises(RuntimeError, match="answered by model"):
+        judge._check_served_model(served)
