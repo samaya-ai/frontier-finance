@@ -217,6 +217,8 @@ def test_openai_judge_requires_key(fake_openai):
         ("gemini-2.0-flash", "gemini-2.0-flash-001"),
         ("gpt-5.4", "gpt-5.4-2026-03-05"),
         ("gpt-4", "gpt-4-0613"),
+        ("gemini-2.5-pro-preview", "gemini-2.5-pro-preview-06-05"),
+        ("gemini-2.5-flash-preview", "gemini-2.5-flash-preview-09-2025"),
     ],
 )
 def test_served_model_accepts_same_model(fake_openai, monkeypatch, requested, served):

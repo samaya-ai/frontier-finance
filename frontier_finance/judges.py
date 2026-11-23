@@ -20,8 +20,9 @@ _CLAUDE_VERSIONED_RE = re.compile(r"claude-(opus|sonnet)-(\d+)(?:-(\d+))?")
 GEMINI_DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 # Snapshot suffixes a provider may append to the requested model name in the
-# response: gpt-5.4-2026-03-05, gpt-4-0613, gemini-2.0-flash-001.
-_SNAPSHOT_SUFFIX = r"(?:-\d{4}-\d{2}-\d{2}|-\d{3,4})?"
+# response: gpt-5.4-2026-03-05, gpt-4-0613, gemini-2.0-flash-001,
+# gemini-2.5-pro-preview-06-05, gemini-2.5-flash-preview-09-2025.
+_SNAPSHOT_SUFFIX = r"(?:-\d{4}-\d{2}-\d{2}|-\d{2}-\d{2}(?:\d{2})?|-\d{3,4})?"
 
 
 class Judge(ABC):
