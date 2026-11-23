@@ -16,8 +16,9 @@ Given a set of **rubrics** per query and the **system responses** you want to gr
 an LLM judge panel decides whether each rubric is satisfied, and the tool reports 
 qualification-rate metrics.
 
-It is self-contained: it talks to provider APIs through their official SDKs and
-has no dependency on any internal evaluation framework.
+It is self-contained: it talks to provider APIs through the official Anthropic
+and OpenAI SDKs (Gemini via its OpenAI-compatible API) and has no dependency on
+any internal evaluation framework.
 
 Read more about FrontierFinance and our system benchmarking results in [our blog post](https://samaya.ai/blog/frontier-finance).
 
@@ -30,14 +31,15 @@ you'll use:
 
 ```bash
 uv pip install 'frontier-finance[anthropic]'          # Claude judges (default)
-uv pip install 'frontier-finance[openai,gemini]'      # mix and match
-uv pip install 'frontier-finance[all]'                # all three backends
+uv pip install 'frontier-finance[openai]'             # GPT and Gemini judges
+uv pip install 'frontier-finance[all]'                # both backends
 ```
 
-Extras: `anthropic` (claude-* models), `openai` (gpt-* / o* models), `gemini`
-(gemini-* models), `all`. The core install pulls in only PyYAML; configuring a
-judge model whose backend isn't installed raises an error telling you which
-flavor to add.
+Extras: `anthropic` (claude-* models), `openai` (gpt-* / o* and gemini-* models),
+`all`. Gemini judges call Gemini's OpenAI-compatible API, so they use the
+`openai` package. The core install pulls in only PyYAML; configuring a judge
+model whose backend isn't installed raises an error telling you which flavor to
+add.
 
 For local development on this package:
 
@@ -73,7 +75,18 @@ Set the key for whichever judge models your config uses:
 ```bash
 export ANTHROPIC_API_KEY=...   # claude-* judges (default)
 export OPENAI_API_KEY=...      # gpt-* / o* judges
-export GEMINI_API_KEY=...      # gemini-* judges
+export GEMINI_API_KEY=...      # gemini-* judges (GOOGLE_API_KEY also works)
+```
+
+To send judge calls through a proxy or OpenAI-compatible gateway instead of the
+providers directly, set the base URL per provider. Each provider keeps its own
+URL and key, so GPT and Gemini can point at different endpoints:
+
+```bash
+export ANTHROPIC_BASE_URL=...  # claude-* judges
+export OPENAI_BASE_URL=...     # gpt-* / o* judges
+export GEMINI_BASE_URL=...     # gemini-* judges, e.g. https://<gateway>/v1
+                               # default: https://generativelanguage.googleapis.com/v1beta/openai/
 ```
 
 ### Step 2 — Write your run config

@@ -17,11 +17,11 @@ frontier-finance-grader = "frontier_finance.cli:CLI.main"
 [project.optional-dependencies]
 # Judge backends — install only the flavors you use, e.g.
 #   uv pip install 'frontier-finance[anthropic]'
-#   uv pip install 'frontier-finance[anthropic,gemini]'
+#   uv pip install 'frontier-finance[anthropic,openai]'
+# gemini-* judges use the OpenAI-compatible API, so they need the openai flavor.
 anthropic = ["anthropic>=0.49"]
-openai = ["openai>=1.0"]
-gemini = ["google-genai>=0.3"]
-all = ["frontier-finance[anthropic,openai,gemini]"]
+openai = ["openai>=1.58"]
+all = ["frontier-finance[anthropic,openai]"]
 dev = ["frontier-finance[all]", "pytest>=8", "ruff>=0.15.20"]
 
 [build-system]
