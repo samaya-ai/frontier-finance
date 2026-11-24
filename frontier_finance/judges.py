@@ -17,6 +17,8 @@ from abc import ABC, abstractmethod
 # rule the internal client applies.
 _CLAUDE_VERSIONED_RE = re.compile(r"claude-(opus|sonnet)-(\d+)(?:-(\d+))?")
 
+GEMINI_DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
 
 class Judge(ABC):
     """Base for a single-model judge client."""
@@ -62,11 +64,10 @@ class Judge(ABC):
             )
         return value
 
-    @staticmethod
-    def _sdk_error(extra: str, package: str) -> ImportError:
+    def _sdk_error(self, extra: str, package: str) -> ImportError:
         """A clear error pointing at the install flavor for a missing backend."""
         return ImportError(
-            f"The {package!r} package is required for {extra} judge models but is not installed. "
+            f"The {package!r} package is required for judge model {self.model!r} but is not installed. "
             f"Install the flavor with: uv pip install 'frontier-finance[{extra}]'."
         )
 
@@ -141,15 +142,23 @@ class OpenAIJudge(Judge):
         except ImportError as e:
             raise self._sdk_error("openai", "openai") from e
 
-        self._require_env("OPENAI_API_KEY", model)
-        self._client = openai.OpenAI(timeout=timeout, max_retries=max_retries)
+        self._client = openai.OpenAI(
+            timeout=timeout, max_retries=max_retries, **self._client_kwargs()
+        )
 
-    def complete(self, system: str, user: str) -> str:
-        kwargs: dict = {}
+    def _client_kwargs(self) -> dict:
+        """Endpoint/credential args for the client; the SDK reads OPENAI_* env."""
+        self._require_env("OPENAI_API_KEY", self.model)
+        return {}
+
+    def _request_kwargs(self) -> dict:
         # Pin temperature=0 for deterministic judging on gpt-* chat models. The
         # o* reasoning models 400 on any temperature != 1, so it's omitted there.
         if self.model.startswith("gpt-"):
-            kwargs["temperature"] = 0
+            return {"temperature": 0}
+        return {}
+
+    def complete(self, system: str, user: str) -> str:
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[
@@ -157,51 +166,36 @@ class OpenAIJudge(Judge):
                 {"role": "user", "content": user},
             ],
             max_completion_tokens=self._max_tokens,
-            **kwargs,
+            **self._request_kwargs(),
         )
         return response.choices[0].message.content or ""
 
 
-class GeminiJudge(Judge):
-    """Gemini judge via the google-genai SDK."""
+class GeminiJudge(OpenAIJudge):
+    """Gemini judge via the OpenAI-compatible Chat Completions API.
 
-    def __init__(
-        self, model: str, *, max_tokens: int, timeout: float, max_retries: int
-    ) -> None:
-        super().__init__(
-            model, max_tokens=max_tokens, timeout=timeout, max_retries=max_retries
-        )
-        try:
-            from google import genai
-        except ImportError as e:
-            raise self._sdk_error("gemini", "google-genai") from e
+    Defaults to Google's OpenAI-compatible endpoint with a Gemini API key. Set
+    GEMINI_BASE_URL (and a matching GEMINI_API_KEY) to go through any
+    OpenAI-compatible gateway instead. Uses its own env vars, not OPENAI_*, so
+    GPT and Gemini judges can point at different endpoints.
+    """
 
+    def _client_kwargs(self) -> dict:
         api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
         if not api_key:
             raise RuntimeError(
-                f"GEMINI_API_KEY (or GOOGLE_API_KEY) must be set to use judge model {model!r}."
+                f"GEMINI_API_KEY (or GOOGLE_API_KEY) must be set to use judge model {self.model!r}."
             )
-        self._client = genai.Client(api_key=api_key)
+        return {
+            "api_key": api_key,
+            "base_url": os.environ.get("GEMINI_BASE_URL") or GEMINI_DEFAULT_BASE_URL,
+        }
 
-    def complete(self, system: str, user: str) -> str:
-        from google.genai import types
-
+    def _request_kwargs(self) -> dict:
+        kwargs: dict = {"temperature": 0}
         # gemini-3 supports thinking-level control; pro models require at least
-        # LOW, others accept MINIMAL. Keep thinking shallow so it doesn't eat the
+        # low, others accept minimal. Keep thinking shallow so it doesn't eat the
         # output budget on what is a mechanical labelling task.
-        thinking_config = None
         if self.model.startswith("gemini-3"):
-            level = "LOW" if "pro" in self.model else "MINIMAL"
-            thinking_config = types.ThinkingConfig(thinking_level=level)
-
-        response = self._client.models.generate_content(
-            model=self.model,
-            contents=user,
-            config=types.GenerateContentConfig(
-                system_instruction=system,
-                max_output_tokens=self._max_tokens,
-                temperature=0,
-                thinking_config=thinking_config,
-            ),
-        )
-        return response.text or ""
+            kwargs["reasoning_effort"] = "low" if "pro" in self.model else "minimal"
+        return kwargs
